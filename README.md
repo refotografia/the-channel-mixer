@@ -1,3 +1,7 @@
+<h5>This is one of 3 apps that I have created recently. I have been investigating in<br>
+programming for so long, but never really got into doing it. Life took its turns, <br>
+and I was presented with a chance to explore deeper into it and refresh some couple<br>
+decades old knowlodge on image processing.</h5>
 <h1>The Channel Mixer!</h1>
 <p>
 <img src="https://github.com/refotografia/channel_mixer/assets/160272402/866f3a5e-0ff6-4cce-bfd6-5c31803eff90" width="500">
