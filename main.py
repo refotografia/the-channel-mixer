@@ -1,37 +1,48 @@
 import sys
-
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QFileDialog, QGroupBox, QGridLayout, QMessageBox, QComboBox
-
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QFileDialog, QGroupBox, QGridLayout, \
+    QMessageBox, QComboBox
+from PyQt5 import QtCore
 import combine
+import remix
 
 
 class MixerApp(QWidget):
     def __init__(self):
         super().__init__()
         self.inputG_lineedit = QLineEdit()
-        self.inputG_label = QLabel('Source for Green Channel:')
+        self.inputG_label = QLabel('Green Source:')
+        self.inputG_label.setAlignment(QtCore.Qt.AlignRight)
         self.inputR_button = QPushButton('Browse')
         self.inputR_lineedit = QLineEdit()
-        self.inputR_label = QLabel('Source for Red Channel:')
-        self.finishGroup = QGroupBox('Save')
+        self.inputR_label = QLabel('Single Image or Red Source:')
+        self.inputR_label.setAlignment(QtCore.Qt.AlignRight)
+        self.finishGroup = QGroupBox('Output Location')
         self.startGroup = QGroupBox('File selection')
-        self.apply_button = QPushButton('Apply Mixer')
+        self.apply_button = QPushButton('Mix 3 Images')
+        self.apply_button.setStyleSheet('QPushButton {background-color: grey; color: black;}')
+        self.remix_button = QPushButton('Remix 1 Image')
+        self.remix_button.setStyleSheet('QPushButton {background-color: grey; color: black;}')
         self.format_compression = QComboBox()
+        self.remix_mode = QComboBox()
         self.output_name_lineedit = QLineEdit()
         self.output_name_label = QLabel('Output Name:')
+        self.output_name_label.setAlignment(QtCore.Qt.AlignRight)
         self.output_button = QPushButton('Browse')
         self.inputG_button = QPushButton('Browse')
         self.output_label = QLabel('Output Path:')
+        self.output_label.setAlignment(QtCore.Qt.AlignRight)
         self.inputB_button = QPushButton('Browse')
         self.inputB_lineedit = QLineEdit()
-        self.inputB_label = QLabel('Source for Blue Channel:')
+        self.inputB_label = QLabel('Blue Source:')
+        self.inputB_label.setAlignment(QtCore.Qt.AlignRight)
         self.output_lineedit = QLineEdit()
+        self.buttonsGroup = QGroupBox('Save')
         self.fc_format = ".jpg"
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle('The Channel Mixer')
-        self.setFixedSize(1000, 700)
+        self.setFixedSize(1200, 1000)
 
         # Labels and LineEdits for input and output paths
         self.inputR_lineedit.setStyleSheet("QLineEdit{background: orangered;}")
@@ -45,10 +56,21 @@ class MixerApp(QWidget):
         self.format_compression.addItem("Jpeg")
         self.format_compression.addItem("Tiff")
         self.format_compression.activated[str].connect(self.onselected)
+        self.remix_mode.setFixedWidth(300)
+        self.remix_mode.addItem("RBG")
+        self.remix_mode.addItem("BRG")
+        self.remix_mode.addItem("BGR")
+        self.remix_mode.addItem("GRB")
+        self.remix_mode.addItem("GBR")
+        self.remix_mode.addItem("BW-R")
+        self.remix_mode.addItem("BW-G")
+        self.remix_mode.addItem("BW-B")
 
         # Button to apply mixer
-        self.apply_button.setFixedWidth(350)
-        self.apply_button.clicked.connect(self.applymixer)
+        self.apply_button.setFixedWidth(300)
+        self.apply_button.clicked.connect(self.apply_combine)
+        self.remix_button.setFixedWidth(300)
+        self.remix_button.clicked.connect(self.apply_remix)
 
         # Start Layout setup
         start_layout = QGridLayout()
@@ -71,13 +93,20 @@ class MixerApp(QWidget):
         finish_layout.addWidget(self.output_name_label, 1, 0)
         finish_layout.addWidget(self.output_name_lineedit, 1, 1)
         finish_layout.addWidget(self.format_compression, 2, 1)
-        finish_layout.addWidget(self.apply_button, 3, 2)
         self.finishGroup.setLayout(finish_layout)
+
+        buttons_layout = QGridLayout()
+        buttons_layout.addWidget(self.remix_mode, 1, 0)
+        buttons_layout.addWidget(self.remix_button, 2, 0)
+        buttons_layout.addWidget(self.apply_button, 2, 2)
+        self.buttonsGroup.setLayout(buttons_layout)
 
         # final layout
         grid = QGridLayout()
+        grid.setVerticalSpacing(75)
         grid.addWidget(self.startGroup, 0, 0)
         grid.addWidget(self.finishGroup, 1, 0)
+        grid.addWidget(self.buttonsGroup, 2, 0)
         self.setLayout(grid)
         self.show()
 
@@ -112,7 +141,7 @@ class MixerApp(QWidget):
     def show_success_message(self, output_path):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
-        msg.setFixedSize(300, 300)
+        msg.setFixedSize(400, 300)
         msg.setText("File saved successfully")
         msg.setInformativeText(f"The file was saved as {output_path}")
         msg.setWindowTitle("Success")
@@ -120,7 +149,7 @@ class MixerApp(QWidget):
         msg.move(self.geometry().center() - msg.rect().center())
         msg.exec_()
 
-    def applymixer(self):
+    def apply_combine(self):
         input_r_path = self.inputR_lineedit.text()
         input_g_path = self.inputG_lineedit.text()
         input_b_path = self.inputB_lineedit.text()
@@ -131,6 +160,17 @@ class MixerApp(QWidget):
             blue=input_b_path
         )
         out.save(f"{output_path}{self.fc_format}")  # Save as defined by ComboBox
+        self.show_success_message(output_path)
+
+    def apply_remix(self):
+        input_r_path = self.inputR_lineedit.text()
+        input_mode = self.remix_mode.currentText()
+        output_path = self.output_lineedit.text() + "/" + self.output_name_lineedit.text() + self.fc_format
+        out = remix.remix_image_channels(
+            image=input_r_path,
+            mode=input_mode
+        )
+        out.save(output_path)  # Save as defined by ComboBox
         self.show_success_message(output_path)
 
 
