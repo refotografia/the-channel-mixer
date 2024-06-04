@@ -17,8 +17,8 @@ decades old knowlodge on image processing.</h5>
 <h5>So this a simple app in Python, PyQT, PIL and Numpy to take advantage of how easy it is to move<br>
   channels around with Numpy.<br><br>
 You need choose 3 images to start with. Either 3 color images or 3 monochromatic images.<br>
-Soon I'll create another mode to shuffle channels in a single image and also to create<br>
-monochromatic images with a single channel of a color image.</h5>
+There is another mode to shuffle channels in a single image and also to create monochromatic<br>
+ images with a single channel of a color image.</h5>
 <p>
 <img src="https://github.com/refotografia/channel_mixer/assets/160272402/0e3d3c7c-fa58-45ee-b90b-4c5418d9f823" width="500">
 </p>
